@@ -27,8 +27,11 @@ jobs:
       - name: Pack NuGet Package
         run: dotnet pack Warden/Warden.csproj --configuration Release --no-build -o ./nupkg
 
-      - name: Upload NuGet Package Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: nuget-package
-          path: ./nupkg/*.nupkg
+      - name: Publish NuGet Package
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET }}
+        run: |
+          $version = $env:GITHUB_REF -replace 'refs/tags/v', ''
+          Write-Host "Detected version: $version"
+          dotnet nuget push "./nupkg/Warden.NET.$version.nupkg" --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json
