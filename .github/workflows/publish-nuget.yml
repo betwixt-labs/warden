@@ -1,0 +1,33 @@
+name: Build and Publish Warden NuGet Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-publish:
+    runs-on: windows-2025
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4.3.0
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore Warden/Warden.csproj
+
+      - name: Build project
+        run: dotnet build Warden/Warden.csproj --configuration Release --no-restore
+
+      - name: Pack NuGet Package
+        run: dotnet pack Warden/Warden.csproj --configuration Release --no-build -o ./nupkg
+
+      - name: Publish NuGet Package
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET }}
+        run: dotnet nuget push ./nupkg/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json

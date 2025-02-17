@@ -99,5 +99,37 @@ namespace Warden.Core
             EnsureIdentity();
             WindowsIdentity.RunImpersonated(_identity!.AccessToken, action);
         }
+
+
+        /// <summary>
+        /// Execute an asynchronous function under the context of the interactive user.
+        /// </summary>
+        /// <param name="action">The asynchronous function to execute.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public static Task RunAsUserAsync(Func<Task> action)
+        {
+            if (!_needsImpersonation)
+            {
+                return action();
+            }
+            EnsureIdentity();
+            return WindowsIdentity.RunImpersonatedAsync(_identity!.AccessToken, action);
+        }
+
+        /// <summary>
+        /// Execute an asynchronous function with a result under the context of the interactive user.
+        /// </summary>
+        /// <typeparam name="T">The result type.</typeparam>
+        /// <param name="function">The asynchronous function to execute.</param>
+        /// <returns>A task representing the asynchronous operation with a result of type T.</returns>
+        public static Task<T> RunAsUserAsync<T>(Func<Task<T>> function)
+        {
+            if (!_needsImpersonation)
+            {
+                return function();
+            }
+            EnsureIdentity();
+            return WindowsIdentity.RunImpersonatedAsync(_identity!.AccessToken, function);
+        }
     }
 }
