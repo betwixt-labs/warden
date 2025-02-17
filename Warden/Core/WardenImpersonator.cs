@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security.Principal;
 using Warden.Windows;
+using System.Threading.Tasks;
 
 namespace Warden.Core
 {
